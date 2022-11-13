@@ -9,13 +9,10 @@ export default function Home() {
   const [name, setName] = useState("");
   const [roomId, setRoomId] = useState("");
 
-  const { rooms, setRooms } = useRooms();
-
   function handleCreateRoom(e) {
     e.preventDefault();
     if (admin) {
       const newRoomId = (100000 + Math.random() * 100000) | 0;
-      setRooms({ ...rooms, [newRoomId]: { messages: [] } });
       router.push(`/room/${newRoomId}`);
     }
   }

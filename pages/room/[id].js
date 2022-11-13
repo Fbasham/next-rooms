@@ -1,18 +1,16 @@
 import io from "socket.io-client";
 import { useState, useEffect } from "react";
-import { useRooms } from "../../contexts/RoomContext";
 
 let socket;
 
 export default function Room({ id }) {
-  const { rooms, setRooms } = useRooms();
+  const [messages, setMessages] = useState([]);
 
   useEffect(() => {
     socketInitializer();
   }, []);
 
   async function socketInitializer() {
-    console.log(rooms);
     await fetch("/api/socket", {
       method: "POST",
       headers: { "content-type": "application/json" },
@@ -22,17 +20,11 @@ export default function Room({ id }) {
     socket = io();
 
     socket.on("join-room", (msg) => {
-      setRooms((prev) => ({
-        ...prev,
-        [id]: { ...prev[id], messages: [...(prev[id]?.messages || []), msg] },
-      }));
+      setMessages((prev) => [...prev, msg]);
     });
 
     socket.on("server-message", (msg) => {
-      setRooms((prev) => ({
-        ...prev,
-        [id]: { ...prev[id], messages: [...(prev[id]?.messages || []), msg] },
-      }));
+      setMessages((prev) => [...prev, msg]);
     });
   }
 
@@ -45,7 +37,7 @@ export default function Room({ id }) {
     <div className="mx-auto max-w-3xl my-4">
       <h1 className="text-xl mb-5">Room {id}</h1>
       <div className="bg-slate-200 h-[480px] rounded-xl space-y-2 overflow-y-scroll">
-        {rooms[id]?.messages?.map((msg, i) => (
+        {messages.map((msg, i) => (
           <div
             key={i}
             className="bg-slate-500 text-white rounded-full px-2 py-1"
