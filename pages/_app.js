@@ -1,7 +1,12 @@
-import '../styles/globals.css'
+import "../styles/globals.css";
+import { RoomProvider } from "../contexts/RoomContext";
 
 function MyApp({ Component, pageProps }) {
-  return <Component {...pageProps} />
+  return (
+    <RoomProvider>
+      <Component {...pageProps} />
+    </RoomProvider>
+  );
 }
 
-export default MyApp
+export default MyApp;
