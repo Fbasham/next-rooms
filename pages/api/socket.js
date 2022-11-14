@@ -1,8 +1,7 @@
 import { Server } from "socket.io";
+import { writeRoom, writeMessage } from "../../lib/dbHelper";
 
 export default function SocketHandler(req, res) {
-  const roomId = req.body;
-
   if (res.socket.server.io) {
     res.end();
     return;
@@ -11,15 +10,17 @@ export default function SocketHandler(req, res) {
   const io = new Server(res.socket.server);
   res.socket.server.io = io;
 
-  const onConnection = (socket) => {
-    socket.join(roomId);
-    socket.to(roomId).emit("join-room", `${socket.id} has joined the room`);
-    socket.on("client-message", (msg) => {
+  io.on("connection", (socket) => {
+    socket.on("join-room", ({ roomId, adminId }) => {
+      writeRoom(roomId, adminId);
+      socket.join(roomId);
+    });
+
+    socket.on("client-message", async ({ roomId, msg }) => {
+      writeMessage(roomId, msg);
       socket.in(roomId).emit("server-message", msg);
     });
-  };
-
-  io.on("connection", onConnection);
+  });
 
   res.end();
 }

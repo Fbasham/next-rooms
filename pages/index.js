@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useRouter } from "next/router";
-import { useRooms } from "../contexts/RoomContext";
 
 export default function Home() {
   const router = useRouter();

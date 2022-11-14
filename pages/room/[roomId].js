@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 
 let socket;
 
-export default function Room({ id }) {
+export default function Room({ roomId }) {
   const [messages, setMessages] = useState([]);
 
   useEffect(() => {
@@ -11,16 +11,12 @@ export default function Room({ id }) {
   }, []);
 
   async function socketInitializer() {
-    await fetch("/api/socket", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify(id),
-    });
+    await fetch("/api/socket");
 
     socket = io();
 
-    socket.on("join-room", (msg) => {
-      setMessages((prev) => [...prev, msg]);
+    socket.on("connect", () => {
+      socket.emit("join-room", { roomId, adminId: socket.id });
     });
 
     socket.on("server-message", (msg) => {
@@ -30,12 +26,15 @@ export default function Room({ id }) {
 
   function handleSubmit(e) {
     e.preventDefault();
-    socket.emit("client-message", e.target.elements.chat.value);
+    socket.emit("client-message", {
+      roomId,
+      msg: e.target.elements.chat.value,
+    });
   }
 
   return (
     <div className="mx-auto max-w-3xl my-4">
-      <h1 className="text-xl mb-5">Room {id}</h1>
+      <h1 className="text-xl mb-5">Room {roomId}</h1>
       <div className="bg-slate-200 h-[480px] rounded-xl space-y-2 overflow-y-scroll">
         {messages.map((msg, i) => (
           <div
@@ -54,6 +53,6 @@ export default function Room({ id }) {
 }
 
 export async function getServerSideProps(context) {
-  let { id } = context.params;
-  return { props: { id } };
+  let { roomId } = context.params;
+  return { props: { roomId } };
 }
