@@ -15,9 +15,7 @@ export default function Room({ roomId }) {
 
     socket = io();
 
-    socket.on("connect", () => {
-      socket.emit("join-room", { roomId, adminId: socket.id });
-    });
+    socket.emit("join-room", { roomId, adminId: socket.id });
 
     socket.on("server-message", (msg) => {
       setMessages((prev) => [...prev, msg]);
