@@ -15,10 +15,13 @@ export default function Room({ roomId }) {
 
     socket = io();
 
-    socket.emit("join-room", { roomId, adminId: socket.id });
+    socket.on("connect", async () => {
+      console.log(socket.id);
+      if (socket.id) socket.emit("join-room", { roomId, adminId: socket.id });
+    });
 
-    socket.on("server-message", (msg) => {
-      setMessages((prev) => [...prev, msg]);
+    socket.on("server-message", ({ userId, msg }) => {
+      setMessages((prev) => [...prev, { userId, msg }]);
     });
   }
 
@@ -26,6 +29,7 @@ export default function Room({ roomId }) {
     e.preventDefault();
     socket.emit("client-message", {
       roomId,
+      userId: socket.id,
       msg: e.target.elements.chat.value,
     });
   }
@@ -34,10 +38,12 @@ export default function Room({ roomId }) {
     <div className="mx-auto max-w-3xl my-4">
       <h1 className="text-xl mb-5">Room {roomId}</h1>
       <div className="bg-slate-200 h-[480px] rounded-xl space-y-2 overflow-y-scroll">
-        {messages.map((msg, i) => (
+        {messages.map(({ userId, msg }, i) => (
           <div
             key={i}
-            className="bg-slate-500 text-white rounded-full px-2 py-1"
+            className={`bg-slate-500 text-white rounded-full px-2 py-1 ${
+              userId === socket.id ? "bg-red-500" : "bg-blue-500 text-right"
+            }`}
           >
             {msg}
           </div>

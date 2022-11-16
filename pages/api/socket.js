@@ -16,9 +16,9 @@ export default function SocketHandler(req, res) {
       socket.join(roomId);
     });
 
-    socket.on("client-message", async ({ roomId, msg }) => {
-      writeMessage(roomId, msg);
-      socket.in(roomId).emit("server-message", msg);
+    socket.on("client-message", ({ roomId, userId, msg }) => {
+      writeMessage(roomId, userId, msg);
+      io.in(roomId).emit("server-message", { userId, msg });
     });
   });
 
